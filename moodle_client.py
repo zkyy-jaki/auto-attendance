@@ -3,7 +3,7 @@ import logging
 import os
 import urllib.parse
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import requests
@@ -19,9 +19,14 @@ logger = logging.getLogger(__name__)
 # Notification message builders
 # ---------------------------------------------------------------------------
 
+def get_now_wib() -> datetime:
+    """Mengembalikan waktu saat ini dalam zona waktu WIB (UTC+7)."""
+    return datetime.now(timezone(timedelta(hours=7)))
+
+
 def _ts() -> str:
     """Mengembalikan timestamp saat ini dalam format WIB yang mudah dibaca."""
-    return datetime.now().strftime("%d %b %Y, %H:%M:%S")
+    return get_now_wib().strftime("%d %b %Y, %H:%M:%S WIB")
 
 
 def _msg_success(name: str, lecture_id: str, lecture_url: str, att_type: str) -> str:
@@ -170,7 +175,7 @@ class MoodleClient:
             self._log("error", f"File jadwal tidak ditemukan: {self.schedule_csv}", notify=True)
             return None
 
-        now         = datetime.now()
+        now         = get_now_wib()
         current_day = now.strftime("%A")[:3]  # "Mon", "Tue", ...
 
         try:
