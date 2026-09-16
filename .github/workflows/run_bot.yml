@@ -33,6 +33,9 @@ jobs:
       # Sesuaikan nama SECRET dengan yang kamu buat di GitHub → Settings → Secrets
       - name: Run Auto Attendance
         env:
+          # --- Pengaturan Waktu ---
+          TZ: "Asia/Jakarta"
+
           # --- User: Zaky ---
           ZAKY_MOODLE_USERNAME: ${{ secrets.ZAKY_MOODLE_USERNAME }}
           ZAKY_MOODLE_PASSWORD: ${{ secrets.ZAKY_MOODLE_PASSWORD }}
