@@ -1,0 +1,15 @@
+{
+    "users": [
+        {
+            "name": "Zaky Mubarok Aljauhari",
+            "login_url": "https://spada.upnyk.ac.id/login/index.php",
+            "schedule_csv": "./metadata/zaky_schedule.csv",
+            "metadata_csv": "./metadata/zaky_metadata.csv",
+
+            "env_username":         "ZAKY_MOODLE_USERNAME",
+            "env_password":         "ZAKY_MOODLE_PASSWORD",
+            "env_telegram_token":   "ZAKY_TELEGRAM_TOKEN",
+            "env_telegram_chat_id": "ZAKY_TELEGRAM_CHATID"
+        }
+    ]
+}

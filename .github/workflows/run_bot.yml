@@ -1,0 +1,48 @@
+name: Auto Attendance Moodle
+
+on:
+  schedule:
+    # Jalankan setiap 30 menit di jam perkuliahan (07:00–18:00 WIB = 00:00–11:00 UTC)
+    # Format cron: menit jam hari bulan hari-minggu
+    - cron: "0,30 0-11 * * 1-6"   # Senin–Sabtu, tiap 30 menit
+  workflow_dispatch:                # Bisa dijalankan manual dari GitHub UI
+
+jobs:
+  run-attendance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # 1. Clone repositori
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Python
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # 4. Jalankan bot
+      # Semua secrets di-inject sebagai environment variables
+      # Sesuaikan nama SECRET dengan yang kamu buat di GitHub → Settings → Secrets
+      - name: Run Auto Attendance
+        env:
+          # --- User: Zaky ---
+          ZAKY_MOODLE_USERNAME: ${{ secrets.ZAKY_MOODLE_USERNAME }}
+          ZAKY_MOODLE_PASSWORD: ${{ secrets.ZAKY_MOODLE_PASSWORD }}
+          ZAKY_TELEGRAM_TOKEN:  ${{ secrets.ZAKY_TELEGRAM_TOKEN }}
+          ZAKY_TELEGRAM_CHATID: ${{ secrets.ZAKY_TELEGRAM_CHATID }}
+
+          # --- Tambahkan env var user lain di sini ---
+          # TEMAN_MOODLE_USERNAME: ${{ secrets.TEMAN_MOODLE_USERNAME }}
+          # TEMAN_MOODLE_PASSWORD: ${{ secrets.TEMAN_MOODLE_PASSWORD }}
+          # TEMAN_TELEGRAM_TOKEN:  ${{ secrets.TEMAN_TELEGRAM_TOKEN }}
+          # TEMAN_TELEGRAM_CHATID: ${{ secrets.TEMAN_TELEGRAM_CHATID }}
+
+        run: python main.py
