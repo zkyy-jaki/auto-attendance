@@ -35,58 +35,58 @@ def _ts() -> str:
 def _msg_success(name: str, lecture_id: str, lecture_url: str, att_type: str) -> str:
     type_label = {"1": "Direct Link", "2": "Tombol Hadir", "3": "Password"}.get(att_type, "?")
     return (
-        f"✅ <b>Absensi Berhasil!</b>\n"
+        f"<b>Absensi Berhasil!</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"👤 <b>Mahasiswa :</b> {name}\n"
-        f"📚 <b>Mata Kuliah:</b> {lecture_id}\n"
-        f"🔧 <b>Metode     :</b> {type_label}\n"
-        f"🕐 <b>Waktu      :</b> {_ts()}\n"
-        f"🔗 <a href=\'{lecture_url}\'>Buka Halaman Absensi</a>"
+        f"<b>Mahasiswa :</b> {name}\n"
+        f"<b>Mata Kuliah:</b> {lecture_id}\n"
+        f"<b>Metode     :</b> {type_label}\n"
+        f"<b>Waktu      :</b> {_ts()}\n"
+        f"<a href='{lecture_url}'>Buka Halaman Absensi</a>"
     )
 
 
 def _msg_no_link(name: str, lecture_id: str) -> str:
     return (
-        f"⏳ <b>Absensi Belum Tersedia</b>\n"
+        f"<b>Absensi Belum Tersedia</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"👤 <b>Mahasiswa :</b> {name}\n"
-        f"📚 <b>Mata Kuliah:</b> {lecture_id}\n"
-        f"ℹ️ Link absensi belum dibuka oleh dosen.\n"
-        f"🕐 <b>Dicek pada :</b> {_ts()}"
+        f"<b>Mahasiswa :</b> {name}\n"
+        f"<b>Mata Kuliah:</b> {lecture_id}\n"
+        f"Link absensi belum dibuka oleh dosen.\n"
+        f"<b>Dicek pada :</b> {_ts()}"
     )
 
 
 def _msg_fail(name: str, lecture_id: str, reason: str) -> str:
     return (
-        f"❌ <b>Absensi Gagal!</b>\n"
+        f"<b>Absensi Gagal!</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"👤 <b>Mahasiswa :</b> {name}\n"
-        f"📚 <b>Mata Kuliah:</b> {lecture_id}\n"
-        f"⚠️ <b>Alasan    :</b> {reason}\n"
-        f"🕐 <b>Waktu     :</b> {_ts()}\n"
-        f"🔄 Bot akan mencoba lagi di siklus berikutnya."
+        f"<b>Mahasiswa :</b> {name}\n"
+        f"<b>Mata Kuliah:</b> {lecture_id}\n"
+        f"<b>Alasan    :</b> {reason}\n"
+        f"<b>Waktu     :</b> {_ts()}\n"
+        f"Bot akan mencoba lagi di siklus berikutnya."
     )
 
 
 def _msg_login_fail(name: str) -> str:
     return (
-        f"🔐 <b>Login Moodle Gagal!</b>\n"
+        f"<b>Login Moodle Gagal!</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"👤 <b>Mahasiswa :</b> {name}\n"
-        f"⚠️ Username atau password salah, atau server Moodle sedang down.\n"
-        f"🕐 <b>Waktu     :</b> {_ts()}\n"
-        f"🔧 Periksa konfigurasi <code>users.json</code>."
+        f"<b>Mahasiswa :</b> {name}\n"
+        f"Username atau password salah, atau server Moodle sedang down.\n"
+        f"<b>Waktu     :</b> {_ts()}\n"
+        f"Periksa konfigurasi <code>users.json</code>."
     )
 
 
 def _msg_startup(names: list[str]) -> str:
     user_list = "\n".join(f"  • {n}" for n in names)
     return (
-        f"🚀 <b>Auto-Attendance Bot Aktif</b>\n"
+        f"<b>Auto-Attendance Bot Aktif</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"📋 <b>User terdaftar:</b>\n{user_list}\n"
-        f"⏱️ Polling setiap <b>5 menit</b>\n"
-        f"🕐 <b>Mulai pada:</b> {_ts()}"
+        f"<b>User terdaftar:</b>\n{user_list}\n"
+        f"Polling setiap <b>15 menit</b>\n"
+        f"<b>Mulai pada:</b> {_ts()}"
     )
 
 

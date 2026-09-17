@@ -2,13 +2,11 @@ name: Auto Attendance Moodle
 
 on:
   schedule:
-    # Jalankan setiap 30 menit di jam perkuliahan (07:00–18:00 WIB = 00:00–11:00 UTC)
+    # Jalankan setiap 15 menit di jam perkuliahan (07:00–17:59 WIB = 00:00–10:00 UTC)
     # Format cron: menit jam hari bulan hari-minggu
-    - cron: "0,30 0-11 * * 1-6"   # Senin–Sabtu, tiap 30 menit, 07:00–18:00 WIB
-  workflow_dispatch:                # Bisa dijalankan manual dari GitHub UI
-  push:
-    branches:
-      - main                        # Trigger sekali saat push ke main (mengaktifkan cron)
+    # Penghematan: ~440 run/bulan vs 8.640 run/bulan (setiap 5 menit 24/7)
+    - cron: "0,15,30,45 0-10 * * 1-6"   # Senin–Sabtu, tiap 15 menit, 07:00–17:59 WIB
+  workflow_dispatch:                       # Bisa dijalankan manual dari GitHub UI
 
 # Cegah dua run berjalan bersamaan (misal cron overlap dengan manual trigger)
 concurrency:
@@ -25,18 +23,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Setup Python
+      # 2. Set timezone OS ke WIB agar datetime sistem akurat
+      - name: Set Timezone ke WIB
+        run: sudo timedatectl set-timezone Asia/Jakarta
+
+      # 3. Setup Python
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: "pip"
 
-      # 3. Install dependencies
+      # 4. Install dependencies
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      # 4. Jalankan bot
+      # 5. Jalankan bot
       # Setup secrets di: GitHub Repo → Settings → Secrets and variables → Actions → New repository secret
       - name: Run Auto Attendance
         env:
