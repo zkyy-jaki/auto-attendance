@@ -7,8 +7,11 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import requests
+import urllib3
 from bs4 import BeautifulSoup
 from lxml import html
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 from notifier import TelegramNotifier
 
@@ -142,6 +145,7 @@ class MoodleClient:
 
         self.notifier = TelegramNotifier(bot_token, chat_id)
         self.session  = requests.Session()
+        self.session.verify = False
         self.session.headers.update({
             "User-Agent": (
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -185,10 +189,12 @@ class MoodleClient:
                     if row.get("Day", "").strip() != current_day:
                         continue
                     try:
+                        # Parsing waktu dari CSV dan membuatnya offset-aware dengan tzinfo dari now
                         start = datetime.strptime(row["Time"].strip(), "%H:%M").replace(
-                            year=now.year, month=now.month, day=now.day
+                            year=now.year, month=now.month, day=now.day, tzinfo=now.tzinfo
                         )
-                        end = start + timedelta(hours=1)
+                        # Batas absensi diperpanjang menjadi 2 jam 30 menit
+                        end = start + timedelta(hours=2, minutes=30)
                         if start <= now < end:
                             return row["Lecture_ID"].strip()
                     except ValueError:
@@ -296,16 +302,8 @@ class MoodleClient:
 
         soup = BeautifulSoup(resp.content, "lxml")
 
-        # Moodle menampilkan tabel rekap sesi, link aktif ada pada baris paling atas
-        # dengan teks "Submit attendance" atau sejenisnya
-        table = soup.find("table", class_=lambda c: c and "attendance" in c.lower()) \
-                or soup.find("table")
-
-        if not table:
-            return None
-
-        # Cari semua <a> yang mengandung 'sessid' atau 'action=add' di href-nya
-        for a_tag in table.find_all("a", href=True):
+        # Cari semua <a> yang mengandung 'sessid' atau 'action=add' di href-nya pada seluruh halaman
+        for a_tag in soup.find_all("a", href=True):
             href = a_tag["href"]
             if ("sessid" in href or "action=add" in href) and "attendance" in href:
                 return href
@@ -347,7 +345,7 @@ class MoodleClient:
 
         Mengembalikan value string jika ditemukan, None jika tidak ada opsi aman.
         """
-        # Kumpulkan semua pasangan (radio_input, label_text) di halaman
+        # Kumpulkan semua pasangan (value, label_text) dari semua strategi
         candidates: list[tuple] = []
 
         # Strategi 1: cari via tag <label for="..."> yang menunjuk ke <input type="radio">
@@ -360,16 +358,29 @@ class MoodleClient:
                 label_text = label.get_text(separator=" ", strip=True).lower()
                 candidates.append((radio["value"], label_text))
 
-        # Strategi 2: fallback — cari radio dengan name='status' dan ambil teks terdekatnya
+        # Strategi 2: SPADA UPNYK — radio button diikuti <span class="statusdesc">
+        # Struktur: <input type="radio" ...><span class="statusdesc">Present</span>
         if not candidates:
             for radio in soup.find_all("input", {"type": "radio", "name": "status"}):
                 if not radio.get("value"):
                     continue
-                # Ambil teks dari parent atau sibling terdekat sebagai label
-                parent_text = ""
-                parent = radio.find_parent(["td", "div", "li", "span"])
-                if parent:
-                    parent_text = parent.get_text(separator=" ", strip=True).lower()
+                # Cari next sibling yang merupakan span dengan class statusdesc
+                sibling = radio.find_next_sibling("span")
+                if sibling:
+                    label_text = sibling.get_text(strip=True).lower()
+                else:
+                    # Fallback: ambil semua teks setelah radio di parent-nya
+                    parent = radio.find_parent()
+                    label_text = parent.get_text(separator=" ", strip=True).lower() if parent else ""
+                candidates.append((radio["value"], label_text))
+
+        # Strategi 3: fallback — cari radio dengan name='status' dan ambil teks dari parent/td
+        if not candidates:
+            for radio in soup.find_all("input", {"type": "radio", "name": "status"}):
+                if not radio.get("value"):
+                    continue
+                parent = radio.find_parent(["td", "div", "li", "span", "label"])
+                parent_text = parent.get_text(separator=" ", strip=True).lower() if parent else ""
                 candidates.append((radio["value"], parent_text))
 
         # Evaluasi setiap kandidat

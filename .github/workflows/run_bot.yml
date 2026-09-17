@@ -4,8 +4,16 @@ on:
   schedule:
     # Jalankan setiap 30 menit di jam perkuliahan (07:00–18:00 WIB = 00:00–11:00 UTC)
     # Format cron: menit jam hari bulan hari-minggu
-    - cron: "0,30 0-11 * * 1-6"   # Senin–Sabtu, tiap 30 menit
+    - cron: "0,30 0-11 * * 1-6"   # Senin–Sabtu, tiap 30 menit, 07:00–18:00 WIB
   workflow_dispatch:                # Bisa dijalankan manual dari GitHub UI
+  push:
+    branches:
+      - main                        # Trigger sekali saat push ke main (mengaktifkan cron)
+
+# Cegah dua run berjalan bersamaan (misal cron overlap dengan manual trigger)
+concurrency:
+  group: attendance-bot
+  cancel-in-progress: false
 
 jobs:
   run-attendance:
@@ -29,8 +37,7 @@ jobs:
         run: pip install -r requirements.txt
 
       # 4. Jalankan bot
-      # Semua secrets di-inject sebagai environment variables
-      # Sesuaikan nama SECRET dengan yang kamu buat di GitHub → Settings → Secrets
+      # Setup secrets di: GitHub Repo → Settings → Secrets and variables → Actions → New repository secret
       - name: Run Auto Attendance
         env:
           # --- Pengaturan Waktu ---
