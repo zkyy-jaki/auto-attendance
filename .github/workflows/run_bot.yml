@@ -16,7 +16,8 @@ jobs:
       # 1. Clone repositori
       - name: Checkout repository
         uses: actions/checkout@v4
-
+      - name: Set Timezone ke WIB
+        run: sudo timedatectl set-timezone Asia/Jakarta
       # 2. Setup Python
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
