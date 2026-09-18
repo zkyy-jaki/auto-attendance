@@ -2,4 +2,4 @@ wheel
 lxml
 beautifulsoup4
 requests
-pwinput
+python-dotenv

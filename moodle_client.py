@@ -174,6 +174,14 @@ class MoodleClient:
         """
         Membaca Schedule.csv dan mengembalikan Lecture_ID yang aktif saat ini
         (dalam window ±durasi 1 jam sejak jam mulai), atau None jika tidak ada.
+
+        CATATAN RENDER (Ephemeral Filesystem):
+            File jadwal (misal: metadata/zaky_schedule.csv) adalah data statis
+            READ-ONLY yang di-commit langsung ke repository Git.
+            Tidak ada data yang ditulis ke file ini saat runtime, sehingga aman
+            digunakan di Render meskipun filesystemnya bersifat ephemeral.
+            Jika jadwal berubah, cukup edit file CSV dan push ke Git — Render
+            akan otomatis redeploy.
         """
         if not os.path.exists(self.schedule_csv):
             self._log("error", f"File jadwal tidak ditemukan: {self.schedule_csv}", notify=True)
@@ -205,7 +213,16 @@ class MoodleClient:
         return None
 
     def get_lecture_meta(self, lecture_id: str) -> Optional[LectureMeta]:
-        """Membaca MetaData.csv dan mengembalikan LectureMeta untuk lecture_id tertentu."""
+        """
+        Membaca MetaData.csv dan mengembalikan LectureMeta untuk lecture_id tertentu.
+
+        CATATAN RENDER (Ephemeral Filesystem):
+            File metadata (misal: metadata/zaky_metadata.csv) adalah data statis
+            READ-ONLY yang di-commit langsung ke repository Git.
+            Tidak ada data yang ditulis ke file ini saat runtime, sehingga aman
+            di Render. Untuk memperbarui link absensi atau tipe attendance,
+            edit file CSV dan push ke Git.
+        """
         if not os.path.exists(self.metadata_csv):
             self._log("error", f"File metadata tidak ditemukan: {self.metadata_csv}", notify=True)
             return None

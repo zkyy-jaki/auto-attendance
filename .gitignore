@@ -3,6 +3,10 @@ credentials
 __pycache__
 .venv
 
+# File credential lokal — JANGAN di-commit ke Git!
+# Salin .env.example menjadi .env lalu isi nilainya.
+.env
+
 metadata/MetaData.csv
 metadata/Schedule.csv
 

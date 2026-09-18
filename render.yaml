@@ -1,0 +1,50 @@
+# =============================================================================
+# render.yaml — Konfigurasi deklaratif Render
+# =============================================================================
+# Dokumentasi: https://render.com/docs/render-yaml-spec
+#
+# Cara deploy:
+#   1. Push file ini ke root repository Anda di GitHub.
+#   2. Di Render Dashboard → New → Background Worker → Connect Repository.
+#   3. Render akan otomatis membaca render.yaml ini.
+#   4. Isi environment variables di: Dashboard → Service → Environment.
+# =============================================================================
+
+services:
+  - type: worker                      # Background Worker (infinite loop, bukan web server)
+    name: moodle-auto-attendance
+    runtime: python
+    region: singapore                 # Pilih region terdekat (Singapore = Asia Tenggara)
+    plan: free                        # Ganti ke "starter" jika butuh lebih banyak resource
+
+    # Build: install semua dependencies dari requirements.txt
+    buildCommand: pip install -r requirements.txt
+
+    # Start: jalankan worker utama
+    startCommand: python main.py
+
+    # Environment variables — nilai diisi via Render Dashboard, BUKAN di sini
+    # (jangan simpan nilai sensitif di file ini!)
+    envVars:
+      - key: TZ
+        value: Asia/Jakarta           # Timezone WIB agar datetime lokal akurat
+
+      # --- Kredensial Zaky (isi nilainya di Render Dashboard → Environment) ---
+      - key: ZAKY_MOODLE_USERNAME
+        sync: false                   # sync: false = Render meminta nilai saat setup
+      - key: ZAKY_MOODLE_PASSWORD
+        sync: false
+      - key: ZAKY_TELEGRAM_TOKEN
+        sync: false
+      - key: ZAKY_TELEGRAM_CHATID
+        sync: false
+
+      # --- Tambahkan user lain di bawah jika diperlukan ---
+      # - key: TEMAN_MOODLE_USERNAME
+      #   sync: false
+      # - key: TEMAN_MOODLE_PASSWORD
+      #   sync: false
+      # - key: TEMAN_TELEGRAM_TOKEN
+      #   sync: false
+      # - key: TEMAN_TELEGRAM_CHATID
+      #   sync: false
